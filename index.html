@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <style>
+        html, body {height: 100%; margin: 5px; padding: 0;}
+        table {background-color: linen; font-family: "Verdana", Times, serif;}
+        th {background-color: #4CAF50;color: white;}
+        tr:nth-child(even) {background-color: #f2f2f2}
+        p {font-family: "Verdana", Times, serif;}
+    </style>
+    <link rel="stylesheet" type="text/css" href="mapStyle.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ArcTouch Code Challenge</title>
+    <script type="text/javascript" src="prototype.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+    <script type="text/javascript" src="map.js"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+
+        function getPreviousRouteList() {
+            var street = getURLParameterByName("street");
+            if (street != null) {
+                document.getElementById("txtStreetName").value = street;
+                getRouteListByStreetName();
+            }
+        }
+
+        function getRouteListByStreetName() {
+            var txtStreetName = document.getElementById("txtStreetName").value.replace(/^\s+|\s+$/gm,'');
+            if (!txtStreetName || txtStreetName.trim() == "") {
+                alert("Street is required to get routes!");
+                return;
+            }
+
+            var oOptions = {
+                method: "POST",
+                postBody: "\n{\n\n\"params\": {\n\n\"stopName\": \"%" + txtStreetName + "%\"\n\n}\n\n}",
+				contentType: "application/json",
+                requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
+                onSuccess: function (oXHR, oJson) {
+                    displayRouteList(oXHR.responseText);
+                },
+                onFailure: function (oXHR, oJson) {
+                    alert("An error occurred requesting route: " + oXHR.statusText);
+                }
+            };
+
+            var oRequest = new Ajax.Request("https://api.appglu.com/v1/queries/findRoutesByStopName/run", oOptions);
+        }
+
+        function displayRouteList(response) {
+            var txtStreetNameToShow = document.getElementById("txtStreetName").value;
+            var txtStreetName       = replaceAll(document.getElementById("txtStreetName").value, " ", "+");
+            var divRouteList        = document.getElementById("divRouteList");
+            var routeLine           = "";
+        	var allRoutes           = response.evalJSON(true);
+
+        	if (allRoutes.rows.length == 0) {
+        		divRouteList.innerHTML = "<p><b>Street not found!</b></p>";
+        	}
+        	else {
+        		var htmlTableHeader  = "<p><b>" + allRoutes.rows.length + " route/routes found for street \"" + txtStreetNameToShow + "\"</b></p><table border=0><thead><th>Line #</th><th>Line Name</th></thead><tbody>";
+        		var htmlTableContent = "";
+        		allRoutes.rows.each(function(aRoute){
+                    routeLine = replaceAll(aRoute.longName, " ", "+");
+        			htmlTableContent = htmlTableContent + "</td><td>" + aRoute.shortName
+        												+ "</td><td><a href=routeDetails.html?routeId=" + aRoute.id + "&routeNo=" + aRoute.shortName + "&routeLine=" + routeLine + "&street=" + txtStreetName + ">" + aRoute.longName + "</a>"
+                                                        + "</td></tr>";
+				});
+				divRouteList.innerHTML = htmlTableHeader + htmlTableContent + "</tbody></table>";
+                localStorage.setItem('divRouteList', divRouteList.innerHTML);
+	        }
+        }
+
+        window.onload = getPreviousRouteList;
+
+        //]]>
+    </script>
+</head>
+<body>
+	<img src="arcTouch.jpg">
+    <p>Please enter street name to retrieve routes:</p>
+    <p>Street <input type="text" id="txtStreetName" onkeydown="if (event.keyCode == 13) {document.getElementById('btnSearch').click()}"/>
+    <input type="button" id="btnSearch" value="Get Routes" onclick="getRouteListByStreetName()"/></p>
+    <p><b>OR</b></p><p>Find street on map*
+    <input type="button" value="Show/Hide Map" onclick="showOrHideMap()"/></p>
+    <div id="divRouteList" style="display:table"></div>
+    <!------------------ maps - START -->
+    <p><input id="pac-input" class="controls" type="text" placeholder="Search Box"></p>
+    <font size="-1">*use the search box and click on marker to get routes</font>
+    <div id="map"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpmdPASW-n2L_NiihIraypW5dj9NpQGjQ&libraries=places&callback=initAutocomplete" async defer></script>
+	<p><br></p>
+    <!------------------ maps - END -->
+</body>
+</html>

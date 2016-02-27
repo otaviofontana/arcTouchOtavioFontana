@@ -1,0 +1,101 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<style>
+		table {background-color: linen; font-family: "Verdana", Times, serif;}
+		th {background-color: #4CAF50;color: white;}
+		tr:nth-child(even) {background-color: #f2f2f2}
+		p {font-family: "Verdana", Times, serif;}
+	</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>ArcTouch Code Challenge</title>
+	<script type="text/javascript" src="prototype.js"></script>
+	<script type="text/javascript" src="utils.js"></script>
+	<script type="text/javascript">
+		//<![CDATA[
+
+		var routeId   = getURLParameterByName("routeId");
+		var routeNo   = getURLParameterByName("routeNo");
+		var routeLine = getURLParameterByName("routeLine");
+		var street    = getURLParameterByName("street");
+
+		function getRouteDetails() {
+			var oOptions1 = {
+				method: "POST",
+				postBody: "\n{\n\n\"params\": {\n\n\"routeId\": " + routeId + "\n\n}\n\n}",
+				contentType: "application/json",
+				requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
+				onSuccess: function (oXHR, oJson) {
+					displayRouteStops(oXHR.responseText);
+				},
+				onFailure: function (oXHR, oJson) {
+					alert("An error occurred requesting route stops: " + oXHR.statusText);
+				}
+			};
+			var oRequest = new Ajax.Request("https://api.appglu.com/v1/queries/findStopsByRouteId/run", oOptions1);
+
+			var oOptions2 = {
+				method: "POST",
+				postBody: "\n{\n\n\"params\": {\n\n\"routeId\": " + routeId + "\n\n}\n\n}",
+				contentType: "application/json",
+				requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
+				onSuccess: function (oXHR, oJson) {
+					displayRouteDepartures(oXHR.responseText);
+				},
+				onFailure: function (oXHR, oJson) {
+					alert("An error occurred requesting route departures: " + oXHR.statusText);
+				}
+			};
+			var oRequest = new Ajax.Request("https://api.appglu.com/v1/queries/findDeparturesByRouteId/run", oOptions2);
+		}
+
+		function displayRouteStops(response) {
+			var divRouteStops = document.getElementById("divRouteStops");
+			var routeInfo     = response.evalJSON(true);
+			
+			if (routeInfo.rows.length == 0) {
+				divRouteStops.innerHTML = "<p><b>Route not found!</b></p>";
+			}
+			else {
+				var htmlTableHeader = "<p><b>" + routeNo + " - " + routeLine + "</b></p><table id=\"stopsTable\" width=100% border=0><thead><th>Stops</th></thead><tbody>";
+				var htmlTableContent = "";
+				routeInfo.rows.each(function(aRoute){
+					htmlTableContent = htmlTableContent + "<tr><td width=10%>" + aRoute.sequence + ". " + aRoute.name + "</td></tr>";
+				});
+				divRouteStops.innerHTML = htmlTableHeader + htmlTableContent + "</tbody></table>";
+			}
+		}
+
+		function displayRouteDepartures(response) {
+			var stopsTableWidth    = document.getElementById("stopsTable").clientWidth;
+			var divRouteDepartures = document.getElementById("divRouteDepartures");
+			var routeInfo          = response.evalJSON(true);
+
+			if (routeInfo.rows.length > 0) {
+				var htmlTableHeader = "<br><table id=\"departuresTable\" width=" + stopsTableWidth + " border=0><thead><th>Departures</th></thead><tbody>";
+				var htmlTableContent = "";
+				var typeOfDay = "";
+				routeInfo.rows.each(function(aRoute){
+					if (aRoute.calendar != typeOfDay) {
+						htmlTableContent = htmlTableContent + "</td></tr><tr><td width=100%><b>" + aRoute.calendar + "</b><br>";
+					}
+					htmlTableContent = htmlTableContent + aRoute.time + " ";
+					typeOfDay = aRoute.calendar;
+				});
+				divRouteDepartures.innerHTML = htmlTableHeader + htmlTableContent + "</td></tr></tbody></table>";
+			}
+		}
+
+		window.onload = getRouteDetails;
+
+		//]]>
+	</script>
+</head>
+<body>
+	<img src="arcTouch.jpg">
+	<div id="divRouteStops" style="display:table"></div>
+	<div id="divRouteDepartures" style="display:table"></div>
+	<p><input action="action" type="button" value="Back to Routes List" onclick="location.href='index.html?street=' + street;"/></p>
+</body>
+</html>
