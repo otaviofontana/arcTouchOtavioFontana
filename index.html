@@ -9,7 +9,7 @@
         p {font-family: "Verdana", Times, serif;}
     </style>
     <link rel="stylesheet" type="text/css" href="mapStyle.css">
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ArcTouch Code Challenge</title>
     <script type="text/javascript" src="prototype.js"></script>
     <script type="text/javascript" src="utils.js"></script>
@@ -34,8 +34,7 @@
 
             var oOptions = {
                 method: "POST",
-                postBody: "\n{\n\n\"params\": {\n\n\"stopName\": \"%" + txtStreetName + "%\"\n\n}\n\n}",
-				contentType: "application/json",
+                postBody: "\n{\n\n\"params\": {\n\n\"stopName\": \"%" + txtStreetName + "%\"\n\n}\n\n}", contentType: "application/json",
                 requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
                 onSuccess: function (oXHR, oJson) {
                     displayRouteList(oXHR.responseText);
@@ -53,23 +52,22 @@
             var txtStreetName       = replaceAll(document.getElementById("txtStreetName").value, " ", "+");
             var divRouteList        = document.getElementById("divRouteList");
             var routeLine           = "";
-        	var allRoutes           = response.evalJSON(true);
+            var allRoutes           = response.evalJSON(true);
 
-        	if (allRoutes.rows.length == 0) {
-        		divRouteList.innerHTML = "<p><b>Street not found!</b></p>";
-        	}
-        	else {
-        		var htmlTableHeader  = "<p><b>" + allRoutes.rows.length + " route/routes found for street \"" + txtStreetNameToShow + "\"</b></p><table border=0><thead><th>Line #</th><th>Line Name</th></thead><tbody>";
-        		var htmlTableContent = "";
-        		allRoutes.rows.each(function(aRoute){
+            if (allRoutes.rows.length == 0) {
+        	divRouteList.innerHTML = "<p><b>Street not found!</b></p>";
+            }
+            else {
+        	var htmlTableHeader  = "<p><b>" + allRoutes.rows.length + " route/routes found for street \"" + txtStreetNameToShow + "\"</b></p><table border=0><thead><th>Line #</th><th>Line Name</th></thead><tbody>";
+        	var htmlTableContent = "";
+        	allRoutes.rows.each(function(aRoute){
                     routeLine = replaceAll(aRoute.longName, " ", "+");
-        			htmlTableContent = htmlTableContent + "</td><td>" + aRoute.shortName
-        												+ "</td><td><a href=routeDetails.html?routeId=" + aRoute.id + "&routeNo=" + aRoute.shortName + "&routeLine=" + routeLine + "&street=" + txtStreetName + ">" + aRoute.longName + "</a>"
-                                                        + "</td></tr>";
-				});
-				divRouteList.innerHTML = htmlTableHeader + htmlTableContent + "</tbody></table>";
-                localStorage.setItem('divRouteList', divRouteList.innerHTML);
-	        }
+        	    htmlTableContent = htmlTableContent + "</td><td>" + aRoute.shortName
+        							      + "</td><td><a href=routeDetails.html?routeId=" + aRoute.id + "&routeNo=" + aRoute.shortName + "&routeLine=" + routeLine + "&street=" + txtStreetName + ">" + aRoute.longName + "</a>"
+                                                                      + "</td></tr>";
+		});
+		divRouteList.innerHTML = htmlTableHeader + htmlTableContent + "</tbody></table>";
+	    }
         }
 
         window.onload = getPreviousRouteList;
@@ -78,7 +76,7 @@
     </script>
 </head>
 <body>
-	<img src="arcTouch.jpg">
+    <img src="arcTouch.jpg">
     <p>Please enter street name to retrieve routes:</p>
     <p>Street <input type="text" id="txtStreetName" onkeydown="if (event.keyCode == 13) {document.getElementById('btnSearch').click()}"/>
     <input type="button" id="btnSearch" value="Get Routes" onclick="getRouteListByStreetName()"/></p>
@@ -90,7 +88,7 @@
     <font size="-1">*use the search box and click on marker to get routes</font>
     <div id="map"></div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpmdPASW-n2L_NiihIraypW5dj9NpQGjQ&libraries=places&callback=initAutocomplete" async defer></script>
-	<p><br></p>
+    <p><br></p>
     <!------------------ maps - END -->
 </body>
 </html>
