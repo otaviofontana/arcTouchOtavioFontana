@@ -58,7 +58,7 @@
                 position: place.geometry.location
             }));
 
-            // HERE IS THE KEY TO PARADISE - START
+            // Create a click listener for each marker
             markers.forEach(function(marker) {
                 marker.addListener('click', function() {
                     document.getElementById("txtStreetName").value = marker.title;
@@ -66,7 +66,6 @@
                 });
             });
             markers = [];
-            // HERE IS THE KEY TO PARADISE - END
 
             if (place.geometry.viewport) {
                 // Only geocodes have viewport.
