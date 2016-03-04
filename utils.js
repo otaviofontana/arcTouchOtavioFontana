@@ -1,5 +1,5 @@
-function replaceAll(str, find, replace) {
-    return str.replace(new RegExp(find, 'g'), replace);
+function replaceAll(str, find, change) {
+    return str.replace(new RegExp(find, 'g'), change);
 }
 
 function getURLParameterByName(name) {
