@@ -23,7 +23,7 @@
 		function getRouteDetails() {
 			var oOptions1 = {
 				method: "POST",
-				postBody: "\n{\n\n\"params\": {\n\n\"routeId\": " + routeId + "\n\n}\n\n}",
+				postBody: "{\"params\": {\"routeId\": " + routeId + "}}",
 				contentType: "application/json",
 				requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
 				onSuccess: function (oXHR, oJson) {
@@ -37,7 +37,7 @@
 
 			var oOptions2 = {
 				method: "POST",
-				postBody: "\n{\n\n\"params\": {\n\n\"routeId\": " + routeId + "\n\n}\n\n}",
+				postBody: "{\"params\": {\"routeId\": " + routeId + "}}",
 				contentType: "application/json",
 				requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
 				onSuccess: function (oXHR, oJson) {
