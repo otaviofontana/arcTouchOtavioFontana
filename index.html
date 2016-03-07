@@ -27,7 +27,7 @@
 
         function getRouteListByStreetName() {
             var txtStreetName = document.getElementById("txtStreetName").value.replace(/^\s+|\s+$/gm,'');
-            if (!txtStreetName || txtStreetName.trim() == "") {
+            if (!txtStreetName) {
                 alert("Street is required to get routes!");
                 return;
             }
