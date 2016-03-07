@@ -78,7 +78,7 @@
 <body>
     <img src="arcTouch.jpg">
     <p>Please enter street name to retrieve routes:</p>
-    <p>Street <input type="text" id="txtStreetName" onkeydown="if (event.keyCode == 13) {document.getElementById('btnSearch').click()}"/>
+    <p>Street <input type="text" id="txtStreetName" onkeydown="if (event.keyCode == 13) {getRouteListByStreetName()}"/>
     <input type="button" id="btnSearch" value="Get Routes" onclick="getRouteListByStreetName()"/></p>
     <p><b>OR</b></p><p>Find street on map*
     <input type="button" value="Show/Hide Map" onclick="showOrHideMap()"/></p>
