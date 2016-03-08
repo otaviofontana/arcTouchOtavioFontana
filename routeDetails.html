@@ -68,12 +68,11 @@
 		}
 
 		function displayRouteDepartures(response) {
-			var stopsTableWidth    = document.getElementById("stopsTable").clientWidth;
 			var divRouteDepartures = document.getElementById("divRouteDepartures");
 			var routeInfo          = response.evalJSON(true);
 
 			if (routeInfo.rows.length > 0) {
-				var htmlTableHeader = "<br><table id=\"departuresTable\" width=" + stopsTableWidth + " border=0><thead><th>Departures</th></thead><tbody>";
+				var htmlTableHeader = "<br><table id=\"departuresTable\" width=100% border=0><thead><th>Departures</th></thead><tbody>";
 				var htmlTableContent = "";
 				var typeOfDay = "";
 				routeInfo.rows.each(function(aRoute){
@@ -94,8 +93,8 @@
 </head>
 <body>
 	<img src="arcTouch.jpg">
-	<div id="divRouteStops" style="display:table"></div>
-	<div id="divRouteDepartures" style="display:table"></div>
+	<div id="divRouteStops"></div>
+	<div id="divRouteDepartures"></div>
 	<p><input action="action" type="button" value="Back to Routes List" onclick="location.href='index.html?street=' + street;"/></p>
 </body>
 </html>
