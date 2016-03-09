@@ -4,7 +4,6 @@
     <link rel="stylesheet" type="text/css" href="mapStyle.css">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ArcTouch Code Challenge</title>
-    <script type="text/javascript" src="prototype.js"></script>
     <script type="text/javascript" src="utils.js"></script>
     <script type="text/javascript" src="map.js"></script>
     <script type="text/javascript">
@@ -25,20 +24,22 @@
                 return;
             }
 
-            var oOptions = {
-                method: "POST",
-                postBody: "{\"params\": {\"stopName\": \"%" + txtStreetName + "%\"}}",
-                contentType: "application/json",
-                requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
-                onSuccess: function (oXHR, oJson) {
-                    displayRouteList(oXHR.responseText);
-                },
-                onFailure: function (oXHR, oJson) {
-                    alert("An error occurred requesting route: " + oXHR.statusText);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://api.appglu.com/v1/queries/findRoutesByStopName/run');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-AppGlu-Environment', 'staging');
+            xhr.setRequestHeader('Authorization', 'Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    displayRouteList(xhr.responseText);
+                }
+                else {
+                    alert("An error occurred requesting route: " + xhr.statusText);
                 }
             };
-
-            var oRequest = new Ajax.Request("https://api.appglu.com/v1/queries/findRoutesByStopName/run", oOptions);
+            txtStreetName = "%" + txtStreetName + "%";
+            xhr.send(JSON.stringify({params:{stopName: txtStreetName}}));
         }
 
         function displayRouteList(response) {
@@ -46,20 +47,24 @@
             var txtStreetName       = replaceAll(document.getElementById("txtStreetName").value, " ", "+");
             var divRouteList        = document.getElementById("divRouteList");
             var routeLine           = "";
-            var allRoutes           = response.evalJSON(true);
+            var allRoutes           = JSON.parse(response);
+            var aRoute              = null;
+            var htmlTableContent    = "";
+            var htmlTableHeader     = "";
+            var i;
 
             if (allRoutes.rows.length == 0) {
         	divRouteList.innerHTML = "<p><b>Street not found!</b></p>";
             }
             else {
-        	var htmlTableHeader  = "<p><b>" + allRoutes.rows.length + " route/routes found for street \"" + txtStreetNameToShow + "\"</b></p><table border=0><thead><th>Line #</th><th>Line Name</th></thead><tbody>";
-        	var htmlTableContent = "";
-        	allRoutes.rows.each(function(aRoute){
-                    routeLine = replaceAll(aRoute.longName, " ", "+");
-        	    htmlTableContent = htmlTableContent + "</td><td>" + aRoute.shortName
-        							      + "</td><td><a href=routeDetails.html?routeId=" + aRoute.id + "&routeNo=" + aRoute.shortName + "&routeLine=" + routeLine + "&street=" + txtStreetName + ">" + aRoute.longName + "</a>"
-                                                                      + "</td></tr>";
-		});
+        	htmlTableHeader  = "<p><b>" + allRoutes.rows.length + " route/routes found for street \"" + txtStreetNameToShow + "\"</b></p><table border=0><thead><th>Line #</th><th>Line Name</th></thead><tbody>";
+            	for(i = 0; i < allRoutes.rows.length; i++) {
+        		aRoute = allRoutes.rows[i];
+        		routeLine = replaceAll(aRoute.longName, " ", "+");
+                	htmlTableContent = htmlTableContent + "</td><td>" + aRoute.shortName
+                        		+ "</td><td><a href=routeDetails.html?routeId=" + aRoute.id + "&routeNo=" + aRoute.shortName + "&routeLine=" + routeLine + "&street=" + txtStreetName + ">" + aRoute.longName + "</a>"
+                        		+ "</td></tr>";
+            	}
 		divRouteList.innerHTML = htmlTableHeader + htmlTableContent + "</tbody></table>";
 	    }
         }
