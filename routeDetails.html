@@ -1,11 +1,9 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<link rel="stylesheet" type="text/css" href="mapStyle.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>ArcTouch Code Challenge</title>
-	<script type="text/javascript" src="prototype.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
 	<script type="text/javascript">
 		//<![CDATA[
@@ -16,67 +14,79 @@
 		var street    = getURLParameterByName("street");
 
 		function getRouteDetails() {
-			var oOptions1 = {
-				method: "POST",
-				postBody: "{\"params\": {\"routeId\": " + routeId + "}}",
-				contentType: "application/json",
-				requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
-				onSuccess: function (oXHR, oJson) {
-					displayRouteStops(oXHR.responseText);
-				},
-				onFailure: function (oXHR, oJson) {
-					alert("An error occurred requesting route stops: " + oXHR.statusText);
+			var xhrStops = new XMLHttpRequest();
+			xhrStops.open('POST', 'https://api.appglu.com/v1/queries/findStopsByRouteId/run');
+			xhrStops.setRequestHeader('Content-Type', 'application/json');
+			xhrStops.setRequestHeader('X-AppGlu-Environment', 'staging');
+			xhrStops.setRequestHeader('Authorization', 'Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==');
+			xhrStops.setRequestHeader('Accept', 'application/json');
+			xhrStops.onload = function() {
+				if (xhrStops.status === 200) {
+					displayRouteStops(xhrStops.responseText);
+				}
+				else {
+					alert("An error occurred requesting route stops: " + xhrStops.statusText);
 				}
 			};
-			var oRequest = new Ajax.Request("https://api.appglu.com/v1/queries/findStopsByRouteId/run", oOptions1);
+			xhrStops.send(JSON.stringify({params:{routeId: routeId}}));
 
-			var oOptions2 = {
-				method: "POST",
-				postBody: "{\"params\": {\"routeId\": " + routeId + "}}",
-				contentType: "application/json",
-				requestHeaders: [ "X-AppGlu-Environment", "staging", "Authorization", "Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==", "Accept", "application/json"],
-				onSuccess: function (oXHR, oJson) {
-					displayRouteDepartures(oXHR.responseText);
-				},
-				onFailure: function (oXHR, oJson) {
-					alert("An error occurred requesting route departures: " + oXHR.statusText);
+			var xhrDepart = new XMLHttpRequest();
+			xhrDepart.open('POST', 'https://api.appglu.com/v1/queries/findDeparturesByRouteId/run');
+			xhrDepart.setRequestHeader('Content-Type', 'application/json');
+			xhrDepart.setRequestHeader('X-AppGlu-Environment', 'staging');
+			xhrDepart.setRequestHeader('Authorization', 'Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==');
+			xhrDepart.setRequestHeader('Accept', 'application/json');
+			xhrDepart.onload = function() {
+				if (xhrDepart.status === 200) {
+					displayRouteDepartures(xhrDepart.responseText);
+				}
+				else {
+					alert("An error occurred requesting route stops: " + xhrDepart.statusText);
 				}
 			};
-			var oRequest = new Ajax.Request("https://api.appglu.com/v1/queries/findDeparturesByRouteId/run", oOptions2);
+			xhrDepart.send(JSON.stringify({params:{routeId: routeId}}));
 		}
 
 		function displayRouteStops(response) {
-			var divRouteStops = document.getElementById("divRouteStops");
-			var routeInfo     = response.evalJSON(true);
-			
+			var divRouteStops    = document.getElementById("divRouteStops");
+			var routeInfo        = JSON.parse(response);
+			var aRoute           = null;
+			var htmlTableContent = "";
+			var htmlTableHeader  = "";
+			var i;
+
 			if (routeInfo.rows.length == 0) {
 				divRouteStops.innerHTML = "<p><b>Route not found!</b></p>";
 			}
 			else {
-				var htmlTableHeader = "<p><b>" + routeNo + " - " + routeLine + "</b></p><table id=\"stopsTable\" width=100% border=0><thead><th>Stops</th></thead><tbody>";
-				var htmlTableContent = "";
-				routeInfo.rows.each(function(aRoute){
+				htmlTableHeader = "<p><b>" + routeNo + " - " + routeLine + "</b></p><table id=\"stopsTable\" width=100% border=0><thead><th>Stops</th></thead><tbody>";
+				for(i = 0; i < routeInfo.rows.length; i++) {
+					aRoute = routeInfo.rows[i];
 					htmlTableContent = htmlTableContent + "<tr><td width=10%>" + aRoute.sequence + ". " + aRoute.name + "</td></tr>";
-				});
+				}
 				divRouteStops.innerHTML = htmlTableHeader + htmlTableContent + "</tbody></table>";
 			}
 		}
 
 		function displayRouteDepartures(response) {
 			var divRouteDepartures = document.getElementById("divRouteDepartures");
-			var routeInfo          = response.evalJSON(true);
+			var routeInfo          = JSON.parse(response);
+			var aRoute             = null;
+			var htmlTableContent   = "";
+			var typeOfDay          = "";
+			var htmlTableHeader    = "";
+			var i;
 
 			if (routeInfo.rows.length > 0) {
-				var htmlTableHeader = "<br><table id=\"departuresTable\" width=100% border=0><thead><th>Departures</th></thead><tbody>";
-				var htmlTableContent = "";
-				var typeOfDay = "";
-				routeInfo.rows.each(function(aRoute){
+				htmlTableHeader = "<br><table id=\"departuresTable\" width=100% border=0><thead><th>Departures</th></thead><tbody>";
+				for(i = 0; i < routeInfo.rows.length; i++) {
+					aRoute = routeInfo.rows[i];
 					if (aRoute.calendar != typeOfDay) {
 						htmlTableContent = htmlTableContent + "</td></tr><tr><td width=100%><b>" + aRoute.calendar + "</b><br>";
 					}
 					htmlTableContent = htmlTableContent + aRoute.time + " ";
 					typeOfDay = aRoute.calendar;
-				});
+				}
 				divRouteDepartures.innerHTML = htmlTableHeader + htmlTableContent + "</td></tr></tbody></table>";
 			}
 		}
