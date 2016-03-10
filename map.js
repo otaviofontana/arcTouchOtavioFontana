@@ -61,6 +61,7 @@
             // Create a click listener for each marker
             markers.forEach(function(marker) {
                 marker.addListener('click', function() {
+                    scroll(0,0);
                     document.getElementById("txtStreetName").value = marker.title;
                     getRouteListByStreetName();
                 });
