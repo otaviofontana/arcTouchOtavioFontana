@@ -14,37 +14,29 @@
 		var street    = getURLParameterByName("street");
 
 		function getRouteDetails() {
-			var xhrStops = new XMLHttpRequest();
-			xhrStops.open('POST', 'https://api.appglu.com/v1/queries/findStopsByRouteId/run');
-			xhrStops.setRequestHeader('Content-Type', 'application/json');
-			xhrStops.setRequestHeader('X-AppGlu-Environment', 'staging');
-			xhrStops.setRequestHeader('Authorization', 'Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==');
-			xhrStops.setRequestHeader('Accept', 'application/json');
-			xhrStops.onload = function() {
-				if (xhrStops.status === 200) {
-					displayRouteStops(xhrStops.responseText);
-				}
-				else {
-					alert("An error occurred requesting route stops: " + xhrStops.statusText);
-				}
-			};
-			xhrStops.send(JSON.stringify({params:{routeId: routeId}}));
+			getRouteAPIResponse("https://api.appglu.com/v1/queries/findStopsByRouteId/run", "stops");
+			getRouteAPIResponse("https://api.appglu.com/v1/queries/findDeparturesByRouteId/run", "departures");
+		}
 
-			var xhrDepart = new XMLHttpRequest();
-			xhrDepart.open('POST', 'https://api.appglu.com/v1/queries/findDeparturesByRouteId/run');
-			xhrDepart.setRequestHeader('Content-Type', 'application/json');
-			xhrDepart.setRequestHeader('X-AppGlu-Environment', 'staging');
-			xhrDepart.setRequestHeader('Authorization', 'Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==');
-			xhrDepart.setRequestHeader('Accept', 'application/json');
-			xhrDepart.onload = function() {
-				if (xhrDepart.status === 200) {
-					displayRouteDepartures(xhrDepart.responseText);
+		function getRouteAPIResponse(url, type) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', url);
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.setRequestHeader('X-AppGlu-Environment', 'staging');
+			xhr.setRequestHeader('Authorization', 'Basic V0tENE43WU1BMXVpTThWOkR0ZFR0ek1MUWxBMGhrMkMxWWk1cEx5VklsQVE2OA==');
+			xhr.setRequestHeader('Accept', 'application/json');
+			xhr.onload = function() {
+				if (xhr.status === 200) {
+					switch(type) {
+						case "stops": displayRouteStops(xhr.responseText); break;
+						case "departures": displayRouteDepartures(xhr.responseText); break;
+					}
 				}
 				else {
-					alert("An error occurred requesting route stops: " + xhrDepart.statusText);
+					alert("An error occurred requesting route " + type + ": " + xhr.statusText);
 				}
 			};
-			xhrDepart.send(JSON.stringify({params:{routeId: routeId}}));
+			xhr.send(JSON.stringify({params:{routeId: routeId}}));
 		}
 
 		function displayRouteStops(response) {
@@ -56,7 +48,7 @@
 			var i;
 
 			if (routeInfo.rows.length == 0) {
-				divRouteStops.innerHTML = "<p><b>Route not found!</b></p>";
+				divRouteStops.innerHTML = "<p><b>There are no stops for this route!</b></p>";
 			}
 			else {
 				htmlTableHeader = "<p><b>" + routeNo + " - " + routeLine + "</b></p><table id=\"stopsTable\" width=100% border=0><thead><th>Stops</th></thead><tbody>";
@@ -77,7 +69,10 @@
 			var htmlTableHeader    = "";
 			var i;
 
-			if (routeInfo.rows.length > 0) {
+			if (routeInfo.rows.length == 0) {
+				divRouteDepartures.innerHTML = "<p><b>There are no departures for this route!</b></p>";
+			}
+			else {
 				htmlTableHeader = "<br><table id=\"departuresTable\" width=100% border=0><thead><th>Departures</th></thead><tbody>";
 				for(i = 0; i < routeInfo.rows.length; i++) {
 					aRoute = routeInfo.rows[i];
